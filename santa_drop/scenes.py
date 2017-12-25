@@ -5,11 +5,13 @@ from pygame.sprite import LayeredDirty
 
 from santa_drop.controllers import Controller
 from santa_drop.controllers import Spawner
+from santa_drop.sprites import Chimney
 from santa_drop.sprites import Santa
 from santa_drop import resources
 
-SANTA_KEY = "santa"
+CHIMNEY_KEY = "chimney"
 GIFTS_KEY = "gifts"
+SANTA_KEY = "santa"
 
 
 class Game(BaseScene):
@@ -19,6 +21,7 @@ class Game(BaseScene):
         self.render_group = LayeredDirty()
 
         self.spawner = Spawner()
+        Chimney(self, self.groups["chimney"])
         santa = Santa(self,
                       Vector(*self.engine.display.get_rect().center),
                       self.groups[GIFTS_KEY],

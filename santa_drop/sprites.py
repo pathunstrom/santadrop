@@ -33,9 +33,29 @@ class Game(ABC):
 class Layers(Enum):
     BACKGROUND = -1
     GIFTS_BEHIND = 1
-    HOUSES = 2
-    GIFTS_IN_FRONT = 3
+    CHIMNEY = 2
+    HOUSES = 3
+    GIFTS_IN_FRONT = 4
     SANTA = 0
+
+
+class Chimney(DirtySprite):
+    image = sprites["chimney"]
+
+    def __init__(self, scene, *groups):
+        super().__init__(*groups)
+        self.rect = self.image.get_rect()
+        display_rect = scene.engine.display.get_rect()
+        self.rect.bottom = display_rect.bottom
+        self.rect.left = display_rect.right
+        self.position = Vector(*self.rect.center)
+        self.layer = Layers.CHIMNEY.value
+
+    def pre_draw(self):
+        self.rect.center = tuple(self.position)
+
+    def update(self, time_delta):
+        self.position += Santa.speed * time_delta
 
 
 class Gift(DirtySprite):
