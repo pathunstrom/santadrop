@@ -4,6 +4,7 @@ from pygame import display
 from pygame.sprite import LayeredDirty
 
 from santa_drop.controllers import Controller
+from santa_drop.controllers import InfiniteObjectManager
 from santa_drop.controllers import Spawner
 from santa_drop.sprites import Chimney
 from santa_drop.sprites import Santa
@@ -19,9 +20,9 @@ class Game(BaseScene):
     def __init__(self, engine):
         super().__init__(engine, background_color=(10, 21, 41))
         self.render_group = LayeredDirty()
-
+        self.spawn_objects = [InfiniteObjectManager(self, Chimney, self.groups[CHIMNEY_KEY])]
         self.spawner = Spawner()
-        Chimney(self, self.groups["chimney"])
+        self.spawn_objects.append(self.spawner)
         santa = Santa(self,
                       Vector(*self.engine.display.get_rect().center),
                       self.groups[GIFTS_KEY],
@@ -42,4 +43,5 @@ class Game(BaseScene):
     def simulate(self, time_delta: float):
         self.controller.respond()
         super().simulate(time_delta)
-        self.spawner.resolve()
+        for spawn_object in self.spawn_objects:
+            spawn_object.resolve(time_delta)

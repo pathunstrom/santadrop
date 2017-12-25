@@ -50,12 +50,27 @@ class Chimney(DirtySprite):
         self.rect.left = display_rect.right
         self.position = Vector(*self.rect.center)
         self.layer = Layers.CHIMNEY.value
+        self.active = True
+
+    def activate(self):
+        self.active = True
+        self.visible = True
+
+    def deactivate(self):
+        self.active = False
+        self.visible = False
 
     def pre_draw(self):
+        if not self.visible:
+            return
         self.rect.center = tuple(self.position)
+        self.dirty = 1
 
     def update(self, time_delta):
+        if not self.active:
+            return
         self.position += Santa.speed * time_delta
+
 
 
 class Gift(DirtySprite):
