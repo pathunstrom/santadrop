@@ -1,0 +1,7 @@
+KEY_CHIMNEY = "chimney"
+KEY_GIFTS = "gifts"
+KEY_SANTA = "santa"
+KEY_UI = "ui"
+
+POINTS_GIFT_DELIVERED = 10
+POINTS_GIFT_FALLEN = -10

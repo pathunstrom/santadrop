@@ -6,13 +6,13 @@ from random import choice
 from random import random as rand
 from random import randint
 
-from ppb import BaseScene
 from ppb import Vector
-import pygame.image as pgimage
+from pygame import font
 from pygame.sprite import DirtySprite
 from pygame.sprite import LayeredDirty
 from pygame.transform import rotate
 
+from santa_drop import config
 from santa_drop.util import scale
 from santa_drop.controllers import Spawner
 from santa_drop.resources import sprites
@@ -29,6 +29,16 @@ class Game(ABC):
     def spawner(self) -> Spawner:
         pass
 
+    @property
+    @abstractmethod
+    def score(self) -> int:
+        pass
+
+    @score.setter
+    @abstractmethod
+    def score(self, val: int) -> None:
+        pass
+
 
 class Layers(Enum):
     BACKGROUND = -1
@@ -37,6 +47,7 @@ class Layers(Enum):
     HOUSES = 3
     GIFTS_IN_FRONT = 4
     SANTA = 0
+    UI = 100
 
 
 class Chimney(DirtySprite):
@@ -72,12 +83,11 @@ class Chimney(DirtySprite):
         self.position += Santa.speed * time_delta
 
 
-
 class Gift(DirtySprite):
 
     sources = None
 
-    def __init__(self, scene: BaseScene, spawn_position: Vector, *groups: LayeredDirty):
+    def __init__(self, scene: Game, spawn_position: Vector, *groups: LayeredDirty):
         super().__init__(*groups)
         self.scene = scene
         if type(self).sources is None:
@@ -118,6 +128,10 @@ class Gift(DirtySprite):
 
     def update(self, time_delta):
         self.position += (Vector(0, 40) + Santa.speed) * time_delta
+        if self.position.y > self.scene.engine.display.get_height():
+            self.kill()
+            self.scene.score += config.POINTS_GIFT_FALLEN
+            return
         self.rotation += randint(1, 3) * -1
         self.dirty = 1
 
@@ -171,3 +185,24 @@ class Santa(DirtySprite):
         self.rect.center = tuple(self.position)
         self.dirty = 1
 
+
+class Score(DirtySprite):
+
+    def __init__(self, scene, score_check, *groups):
+        super().__init__(*groups)
+        self.scene = scene
+        self.score_check = score_check
+        self.font = font.Font(font.get_default_font(), 16)
+        self.color = (200, 0, 0)
+        self.image = None
+        self.rect = None
+        self.draw_score()
+        self.layer = Layers.UI.value
+
+    def draw_score(self):
+        self.image = self.font.render(str(self.score_check()), True, self.color)
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (10, 10)
+
+    def pre_draw(self):
+        self.draw_score()
