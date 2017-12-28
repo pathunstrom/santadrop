@@ -6,6 +6,7 @@ from random import choice
 from random import random as rand
 from random import randint
 
+from ppb import BaseScene
 from ppb import Vector
 from pygame import font
 from pygame.sprite import DirtySprite
@@ -22,7 +23,7 @@ RESOURCES = path.join(path.dirname(__file__), "..", "resources")
 
 # ABC
 
-class Game(ABC):
+class Game(BaseScene, ABC):
 
     @property
     @abstractmethod
@@ -39,6 +40,16 @@ class Game(ABC):
     def score(self, val: int) -> None:
         pass
 
+    @property
+    @abstractmethod
+    def missed_chimneys(self) -> int:
+        pass
+
+    @missed_chimneys.setter
+    @abstractmethod
+    def missed_chimneys(self, val: int) -> None:
+        pass
+
 
 class Layers(Enum):
     BACKGROUND = -1
@@ -51,9 +62,9 @@ class Layers(Enum):
 
 
 class Chimney(DirtySprite):
-    image = sprites["chimney"]
+    image = scale(sprites["chimney"], 1.5)
 
-    def __init__(self, scene, *groups):
+    def __init__(self, scene: Game, *groups):
         super().__init__(*groups)
         self.rect = self.image.get_rect()
         display_rect = scene.engine.display.get_rect()
@@ -62,14 +73,19 @@ class Chimney(DirtySprite):
         self.position = Vector(*self.rect.center)
         self.layer = Layers.CHIMNEY.value
         self.active = True
+        self.delivered = False
+        self.scene = scene
 
     def activate(self):
         self.active = True
         self.visible = True
+        self.delivered = False
 
     def deactivate(self):
         self.active = False
         self.visible = False
+        if not self.delivered:
+            self.scene.missed_chimneys += 1
 
     def pre_draw(self):
         if not self.visible:

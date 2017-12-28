@@ -32,6 +32,7 @@ class Game(BaseScene):
         channel = resources.sounds["santaclauseiscoming"].play(-1)
         channel.set_volume(0.1)
         self.score = 0
+        self.missed_chimneys = 0
         Score(self, lambda: self.score, self.groups[config.KEY_UI])
 
     def render(self):
@@ -55,6 +56,9 @@ class Game(BaseScene):
                 if chimney.rect.left < gift.position.x < chimney.rect.right:
                     successes += 1
                     gift.kill()
+                chimney.delivered = True
         if successes:
             self.score += config.POINTS_GIFT_DELIVERED * successes
             logging.debug(f"{successes} Successes!")
+        if self.missed_chimneys >= config.LIMIT_CHIMNEYS_MISSED:
+            self.running = False

@@ -5,4 +5,4 @@ from pygame import transform
 
 
 def scale(image: Surface, factor: Number) -> Surface:
-    return transform.smoothscale(image, (image.get_width() * factor, image.get_height() * factor))
+    return transform.smoothscale(image, (int(image.get_width() * factor), int(image.get_height() * factor)))
